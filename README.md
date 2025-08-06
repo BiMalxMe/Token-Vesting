@@ -1,88 +1,104 @@
-# token-vesting
+# Vesting Program
 
-This is a Next.js app containing:
+This is a Solana Anchor program for managing token vesting schedules for employees.
 
-- Tailwind CSS setup for styling
-- Useful wallet UI elements setup using [@solana/web3.js](https://www.npmjs.com/package/@solana/web3.js)
-- A basic Counter Solana program written in Anchor
-- UI components for interacting with the Counter program
+## Features
 
-## Getting Started
+- Create a vesting account for a company and mint.
+- Add employee vesting schedules with customizable start, end, and cliff times.
+- Employees can claim vested tokens according to their schedule.
+- Secure token transfers using PDAs and Anchor constraints.
 
-### Installation
+## Accounts
 
-#### Download the template
+### VestingAccount
 
-```shell
-pnpm create solana-dapp@latest -t gh:solana-foundation/templates/legacy/token-vesting
-```
+Stores company-level vesting configuration.
 
-#### Install Dependencies
+| Field                 | Type    | Description                        |
+|-----------------------|---------|------------------------------------|
+| owner                 | Pubkey  | Owner of the vesting account       |
+| mint                  | Pubkey  | Token mint address                 |
+| treasury_token_account| Pubkey  | PDA holding tokens for vesting     |
+| company_name          | String  | Name of the company (max 32 chars) |
+| bump_for_treasury     | u8      | PDA bump for treasury account      |
+| bump                  | u8      | PDA bump for vesting account       |
 
-```shell
-pnpm install
-```
+### EmployeeAccount
 
-## Apps
+Stores individual employee vesting schedule.
 
-### anchor
+| Field           | Type   | Description                          |
+|-----------------|--------|--------------------------------------|
+| beneficiary     | Pubkey | Employee's wallet address            |
+| start_time      | i64    | Vesting start timestamp (UTC)        |
+| end_time        | i64    | Vesting end timestamp (UTC)          |
+| cliff_time      | i64    | Cliff timestamp (UTC)                |
+| vesting_account | Pubkey | Parent vesting account               |
+| total_amount    | u64    | Total tokens to be vested            |
+| total_withdrawn | u64    | Amount already claimed               |
+| bump            | u8     | PDA bump                             |
 
-This is a Solana program written in Rust using the Anchor framework.
+## Instructions
 
-#### Commands
+### create_vesting_account
 
-You can use any normal anchor commands. Either move to the `anchor` directory and run the `anchor` command or prefix the
-command with `pnpm`, eg: `pnpm anchor`.
+Creates a new vesting account for a company.
 
-#### Sync the program id:
+- **Accounts**:  
+  - `signer` (payer)  
+  - `vesting_account` (PDA)  
+  - `mint`  
+  - `treasury_token_account` (PDA)  
+  - `system_program`  
+  - `token_program`
 
-Running this command will create a new keypair in the `anchor/target/deploy` directory and save the address to the
-Anchor config file and update the `declare_id!` macro in the `./src/lib.rs` file of the program.
+- **Args**:  
+  - `company_name: String`
 
-You will manually need to update the constant in `anchor/lib/counter-exports.ts` to match the new program id.
+### create_employee_account
 
-```shell
-pnpm anchor keys sync
-```
+Creates a new employee vesting schedule.
 
-#### Build the program:
+- **Accounts**:  
+  - `owner` (company)  
+  - `beneficiary`  
+  - `vesting_account`  
+  - `employee_account` (PDA)  
+  - `system_program`
 
-```shell
-pnpm anchor-build
-```
+- **Args**:  
+  - `start_time: i64`  
+  - `end_time: i64`  
+  - `total_amount: u64`  
+  - `cliff_time: i64`
 
-#### Start the test validator with the program deployed:
+### claim_tokens
 
-```shell
-pnpm anchor-localnet
-```
+Allows an employee to claim their vested tokens.
 
-#### Run the tests
+- **Accounts**:  
+  - `beneficiary` (signer)  
+  - `employee_account`  
+  - `vesting_account`  
+  - `mint`  
+  - `treasury_token_account`  
+  - `employee_token_account` (ATA, created if needed)  
+  - `token_program`  
+  - `associated_token_program`  
+  - `system_program`
 
-```shell
-pnpm anchor-test
-```
+- **Args**:  
+  - `company_name: String`
 
-#### Deploy to Devnet
+## Error Codes
 
-```shell
-pnpm anchor deploy --provider.cluster devnet
-```
+- `ClaimNotAvailable`: Claim not available yet (cliff not reached)
+- `InvalidVestingPeriod`: Vesting period is invalid
+- `CalculationOverflow`: Arithmetic overflow in calculation
+- `NothingToClaim`: No tokens available to claim
 
-### web
+## Example Usage
 
-This is a React app that uses the Anchor generated client to interact with the Solana program.
+See the `programs/vesting/src/lib.rs` for detailed implementation.
 
-#### Commands
-
-Start the web app
-
-```shell
-pnpm dev
-```
-
-Build the web app
-
-```shell
-pnpm build
-```
