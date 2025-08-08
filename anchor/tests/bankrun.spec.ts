@@ -133,7 +133,7 @@ describe("Vesting Smart Contract Tests", () => {
 
   it("should create an employee vesting account", async () => {
     const tx2 = await program.methods
-      .createEmployeeVesting(new BN(0), new BN(100), new BN(100), new BN(0))
+      .createEmployeeAccount(new BN(0), new BN(100), new BN(100), new BN(0))
       .accounts({
         beneficiary: beneficiary.publicKey,
         vestingAccount: vestingAccountKey,
