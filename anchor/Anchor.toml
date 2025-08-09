@@ -15,12 +15,13 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "npx jest"
+# Run tests with ts-mocha (TypeScript + Mocha)
+test = "npx ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
 
 [test]
 startup_wait = 5000
 shutdown_wait = 2000
-upgradeable = false
+upgradeable = true
 
 [test.validator]
 bind_address = "127.0.0.1"

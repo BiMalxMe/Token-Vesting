@@ -18,6 +18,7 @@ import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import IDL from "../target/idl/vesting.json";
 import { Vesting } from "../target/types/vesting";
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
+import { before, describe,it } from "mocha";
 
 describe("Vesting Smart Contract Tests", () => {
   const companyName = "Company";
@@ -34,7 +35,7 @@ describe("Vesting Smart Contract Tests", () => {
   let program2: Program<Vesting>;
   let context: ProgramTestContext;
 
-  beforeAll(async () => {
+  before(async () => {
     beneficiary = new anchor.web3.Keypair();
 
     // set up bankrun
@@ -119,7 +120,7 @@ describe("Vesting Smart Contract Tests", () => {
   it("should fund the treasury token account", async () => {
     const amount = 10_000 * 10 ** 9;
     const mintTx = await mintTo(
-      // @ts-ignores
+      // @ts-ignore
       banksClient,
       employer,
       mint,
