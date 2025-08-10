@@ -18,7 +18,7 @@ import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import IDL from "../target/idl/vesting.json";
 import { Vesting } from "../target/types/vesting";
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
-import { before, describe,it } from "mocha";
+import { before } from "mocha";
 
 describe("Vesting Smart Contract Tests", () => {
   const companyName = "Company";
@@ -120,7 +120,7 @@ describe("Vesting Smart Contract Tests", () => {
   it("should fund the treasury token account", async () => {
     const amount = 10_000 * 10 ** 9;
     const mintTx = await mintTo(
-      // @ts-ignore
+      // @ts-ignores
       banksClient,
       employer,
       mint,
@@ -134,7 +134,7 @@ describe("Vesting Smart Contract Tests", () => {
 
   it("should create an employee vesting account", async () => {
     const tx2 = await program.methods
-      .createEmployeeAccount(new BN(0), new BN(100), new BN(100), new BN(0))
+      .createEmployeeVesting(new BN(0), new BN(100), new BN(100), new BN(0))
       .accounts({
         beneficiary: beneficiary.publicKey,
         vestingAccount: vestingAccountKey,
@@ -145,4 +145,31 @@ describe("Vesting Smart Contract Tests", () => {
     console.log("Employee account", employeeAccount.toBase58());
   });
 
+  it("should claim tokens", async () => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const currentClock = await banksClient.getClock();
+    context.setClock(
+      new Clock(
+        currentClock.slot,
+        currentClock.epochStartTimestamp,
+        currentClock.epoch,
+        currentClock.leaderScheduleEpoch,
+        1000n
+      )
+    );
+
+    console.log("Employee account", employeeAccount.toBase58());
+
+    const tx3 = await program2.methods
+      .claimTokens(companyName)
+      .accounts({
+        // @ts-ignore
+        beneficiary: beneficiary.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc({ commitment: "confirmed", skipPreflight: true });
+
+    console.log("Claim Tokens transaction signature", tx3);
+  });
 });
