@@ -1,4 +1,5 @@
 'use client'
+import { BN } from '@coral-xyz/anchor'; 
 
 import { getVestingProgramId, getVestingProgram } from '@project/anchor'
 import { useConnection } from '@solana/wallet-adapter-react'
@@ -16,10 +17,10 @@ interface CreateVestingArgs{
 }
 
 interface CreateEmployeeArgs{
-  startTime : number,
-  endTime : number ,
-  totalAmount : number,
-  cliffTime : number,
+  startTime : BN,
+  endTime : BN ,
+  totalAmount : BN,
+  cliffTime : BN,
   beneficary : string
 }
 

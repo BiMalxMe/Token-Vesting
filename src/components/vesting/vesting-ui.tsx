@@ -1,4 +1,5 @@
 'use client'
+import { BN } from '@coral-xyz/anchor'; 
 
 import { PublicKey } from '@solana/web3.js'
 import { useMemo, useState } from 'react'
@@ -150,10 +151,10 @@ function VestingCard({ account }: { account: PublicKey }) {
         <Button
           onClick={() => {
             createEmployeeVestingAccount.mutateAsync({
-              startTime,
-              endTime,
-              totalAmount,
-              cliffTime,
+              startTime : new BN(startTime),
+              endTime: new BN(endTime),
+              totalAmount: new BN(totalAmount),
+              cliffTime: new BN(cliffTime),
               beneficary: beneficiary,
             })
           }}
